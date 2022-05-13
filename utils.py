@@ -1,9 +1,9 @@
 import random
-
+from textwrap import wrap
 
 def generate_dna(n: int) -> str:
     '''
-    returns string containing of  with a length of 'n'
+    returns string containing of with a length of 'n'
     '''
     nucleotides = ('A', 'T', 'G', 'C')
     return ''.join(random.choice(nucleotides) for i in range(n))
@@ -23,3 +23,9 @@ def read_dna_from_file(path: str) -> str:
     '''
     with open(path, 'r') as f:
         return f.read()
+
+def cut_dna(dna: str, k: int) -> list:
+    '''
+    returns list of substrings with a length of 'k' from single string
+    '''
+    return wrap(dna,k)

@@ -1,12 +1,13 @@
-import random
+from random import choice
 from textwrap import wrap
-
+from functools import wraps
+from time import time
 def generate_dna(n: int) -> str:
     '''
     returns string containing of with a length of 'n'
     '''
     nucleotides = ('A', 'T', 'G', 'C')
-    return ''.join(random.choice(nucleotides) for i in range(n))
+    return ''.join(choice(nucleotides) for i in range(n))
 
 
 def write_dna_to_file(data: str, path: str):
@@ -29,3 +30,17 @@ def cut_dna(dna: str, k: int) -> list:
     returns list of substrings with a length of 'k' from single string
     '''
     return wrap(dna,k)
+
+def timing_decorator(f):
+    '''
+    measures time of executing method 'f'
+    '''
+    @wraps(f)
+    def wrap(*args, **kw):
+        ts = time()
+        result = f(*args, **kw)
+        te = time()
+        print(f'func :{f.__name__} args:{args} took: {te-ts}')
+        return result
+    return wrap
+

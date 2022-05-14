@@ -91,6 +91,6 @@ def include_errors(start_neg, dict_data, n_positives, n_negitves, oligo_len):
     while positive_index < n_positives:
         new = generate_dna(oligo_len)
         if new not in dict_data.keys():
-            dict_data[new] = 1
+            dict_data[new] = 1 #być może losowo?
             positive_index += 1
 

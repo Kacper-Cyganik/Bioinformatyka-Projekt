@@ -1,4 +1,5 @@
 import utils
+from config import N_NEGATIVES, N_POSITIVES, N_DNA, N_DNA_CUT
 
 # dummy function
 @utils.timing_decorator
@@ -10,10 +11,16 @@ def f(a):
 if __name__ == "__main__":
     # dna = utils.read_dna_from_file('data/sequence.txt')
     # dna = utils.write_dna_to_file('ACGGTCGA','data/sequence.txt')
-    dna = utils.generate_dna(n=1000)
-    dna_cut = utils.cut_dna(dna, 4)
-    print(dna_cut)
-    # dna = utils.generate_all_combinations(5)
-    # f(100000000)
 
-    utils.generate_repetitions(dna_cut)
+    # generate DNA of n legnth
+    dna = utils.generate_dna(n=N_DNA)
+
+    # 
+    dna_cut = utils.cut_dna(dna, N_DNA_CUT)
+
+    # my_sum, repetitions = utils.generate_repetitions(dna_cut)
+
+    negative_errors = N_DNA_CUT*N_NEGATIVES
+    positive_errors  = N_DNA_CUT*
+    
+    

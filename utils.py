@@ -33,7 +33,11 @@ def cut_dna(dna: str, k: int) -> list:
     '''
     returns list of substrings with a length of 'k' from single string
     '''
-    return wrap(dna, k)
+    # index = 0
+    # while index < 
+    return [dna[i: j] for i in range(len(dna)) for j in range(i + 1, len(dna) + 1) if len(dna[i:j]) == k]
+
+
 
 
 def timing_decorator(f):
@@ -61,7 +65,20 @@ def generate_all_combinations(n: int) -> list:
 
 def generate_repetitions(data) -> dict():
     output = {}
+    my_sum = 0
     for i in data:
         x = data.count(i)
         output[i]= x if x<3 else '*' 
-    return output
+
+    for i in output:
+        if output[i] != 1:
+            my_sum += 1
+    return my_sum, output
+
+def include_errors(dict_data, n_positives, n_negitves):
+
+    # negatives
+    negative_index = 0
+    while negative_index < n_negitves:
+        dict_data.remove()
+

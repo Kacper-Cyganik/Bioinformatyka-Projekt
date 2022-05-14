@@ -1,4 +1,5 @@
 from random import choice
+import random
 from textwrap import wrap
 from functools import wraps
 from time import time
@@ -75,10 +76,21 @@ def generate_repetitions(data) -> dict():
             my_sum += 1
     return my_sum, output
 
-def include_errors(dict_data, n_positives, n_negitves):
+def include_errors(start_neg, dict_data, n_positives, n_negitves, oligo_len):
 
     # negatives
-    negative_index = 0
+    negative_index = start_neg
     while negative_index < n_negitves:
-        dict_data.remove()
+        to_delete_index = choice(list(dict_data.keys()))
+        if dict_data[to_delete_index] == 1:
+            negative_index += 1
+        dict_data.pop(to_delete_index)
+
+    # positives
+    positive_index = 0
+    while positive_index < n_positives:
+        new = generate_dna(oligo_len)
+        if new not in dict_data.keys():
+            dict_data[new] = 1
+            positive_index += 1
 

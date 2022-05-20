@@ -29,4 +29,4 @@ if __name__ == "__main__":
     dna_out = sorted(list(repetitions.keys()))
 
     print(dna_out)
-    print(len(dna_out))
+    graph = utils.generate_graph(dna_out)

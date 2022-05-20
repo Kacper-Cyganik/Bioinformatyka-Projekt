@@ -1,5 +1,6 @@
 from random import choice
 import random
+import secrets
 from textwrap import wrap
 from functools import wraps
 from time import time
@@ -35,10 +36,8 @@ def cut_dna(dna: str, k: int) -> list:
     returns list of substrings with a length of 'k' from single string
     '''
     # index = 0
-    # while index < 
+    # while index <
     return [dna[i: j] for i in range(len(dna)) for j in range(i + 1, len(dna) + 1) if len(dna[i:j]) == k]
-
-
 
 
 def timing_decorator(f):
@@ -64,20 +63,26 @@ def generate_all_combinations(n: int) -> list:
     return output
 
 
-def generate_repetitions(data) -> dict():
+def generate_repetitions(data:dict):
+    '''
+    generate dict that contains repetitions of oligonucleotides
+    '''
     output = {}
     my_sum = 0
     for i in data:
         x = data.count(i)
-        output[i]= x if x<3 else '*' 
+        output[i] = x if x < 3 else '*'
 
     for i in output:
         if output[i] != 1:
             my_sum += 1
     return my_sum, output
 
-def include_errors(start_neg, dict_data, n_positives, n_negitves, oligo_len):
 
+def include_errors(start_neg:int, dict_data:dict, n_positives:int, n_negitves:int, oligo_len:int) -> None:
+    '''
+    include positive and negative errors to dict_data
+    '''
     # negatives
     negative_index = start_neg
     while negative_index < n_negitves:
@@ -91,6 +96,39 @@ def include_errors(start_neg, dict_data, n_positives, n_negitves, oligo_len):
     while positive_index < n_positives:
         new = generate_dna(oligo_len)
         if new not in dict_data.keys():
-            dict_data[new] = 1 #być może losowo?
+            dict_data[new] = 1  # być może losowo?
             positive_index += 1
+
+def check_overlap(first:str, second:str) ->int:
+    '''
+    returns how many nucletides overlap (for example: heck_overlap('ACTAGACT', 'CTAGACTG')->7)
+    '''
+    k = len(first)
+    overlap = 0
+    for i in range(k-1,0,-1):
+        first_suffix = first[i:]
+        second_prefix = second[:k-i]
+        #print(first_suffix, second_prefix)
+        if first_suffix == second_prefix:
+            overlap = i
+    return overlap
+
+@timing_decorator
+def generate_graph(data:list):
+    '''
+    returns grap representation of given data
+    '''
+    n = len(data)
+    graph = [[0 for x in range(n)] for y in range(n)] # create NxN matrix of zeros
+    for i in range(n):
+        for j in range(n):
+            if i!=j:
+                overlap = check_overlap(data[i], data[j])
+                if overlap<=4: # if overlap is big enough, add edge
+                    graph[i][j]=overlap
+    return graph
+
+# print(check_overlap('ABCDEFGH', 'BCDEFGHY'))
+
+
 

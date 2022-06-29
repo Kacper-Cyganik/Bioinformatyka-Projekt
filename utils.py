@@ -1,12 +1,9 @@
 from random import choice
-import random
-import secrets
-from textwrap import wrap
 from functools import wraps
 from time import time
 import itertools
-
-
+import numpy as np
+import config
 def generate_dna(n: int) -> str:
     '''
     returns string containing of with a length of 'n'
@@ -49,7 +46,7 @@ def timing_decorator(f):
         ts = time()
         result = f(*args, **kw)
         te = time()
-        print(f'func :{f.__name__} args:{args} took: {te-ts}')
+        # print(f'func :{f.__name__} args:{args} took: {te-ts}')
         return result
     return wrap
 
@@ -109,9 +106,16 @@ def check_overlap(first:str, second:str) ->int:
         first_suffix = first[i:]
         second_prefix = second[:k-i]
         #print(first_suffix, second_prefix)
-        if first_suffix == second_prefix:
+        if first_suffix == second_prefix and i<overlap:
             overlap = i
     return overlap
+
+
+
+# if __name__ == '__main__':
+#     print(check_overlap('ala', 'ala'))
+
+
 
 @timing_decorator
 def generate_graph(data:list):
@@ -125,10 +129,33 @@ def generate_graph(data:list):
             if i!=j:
                 overlap = check_overlap(data[i], data[j])
                 if overlap<=4: # if overlap is big enough, add edge
-                    graph[i][j]=overlap
-    return graph
+                    graph[i][j]=overlap+1
+
+    for i in range(len(graph[0])):
+        graph[i][i] = np.inf
+    return np.array(graph)
 
 # print(check_overlap('ABCDEFGH', 'BCDEFGHY'))
 
+
+def hamming_distance(string1, string2):
+    dist_counter = 0
+    for n in range(len(string1)):
+        if string1[n] != string2[n]:
+            dist_counter += 1
+    return dist_counter
+
+def find_sequence_in_graph(path, graph, dna_out):
+    new_dna = ''
+    for vertex in path:
+        print(new_dna)
+        print(dna_out[vertex[1]])
+        overlap = graph[vertex[0][vertex[1]]]
+        new_dna += dna_out[vertex[1]][config.N_DNA_CUT-overlap::]
+        print(new_dna)
+        new_dna += dna_out[vertex[1]]
+
+        
+    
 
 

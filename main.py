@@ -28,13 +28,8 @@ if __name__ == "__main__":
     dna_out = sorted(list(repetitions.keys()))
 
     graph = utils.generate_graph(dna_out)
-    print('----------')
-    #print(graph)
-    print('----------')
     ant_colony = AntColony(graph, 1, 1, 100, 0.95, alpha=1, beta=1)
     shortest_path = ant_colony.run()
-    for i in shortest_path:
-        print(i)
 
     utils.find_sequence_in_graph(shortest_path, graph, dna_out)
     #print ("shorted_path: {}".format(shortest_path))

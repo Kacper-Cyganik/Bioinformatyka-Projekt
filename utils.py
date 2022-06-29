@@ -105,7 +105,7 @@ def check_overlap(first:str, second:str) ->int:
     for i in range(k-1,0,-1):
         first_suffix = first[i:]
         second_prefix = second[:k-i]
-        print(first_suffix, second_prefix)
+        #print(first_suffix, second_prefix)
         if first_suffix == second_prefix:
             if i>overlap:
                 overlap = i
@@ -148,20 +148,9 @@ def hamming_distance(string1, string2):
 
 def find_sequence_in_graph(path, graph, dna_out):
     new_dna = ''
-    print('path')
-    print(path[0])
-    print('path')
     for vertex in path[0]:
-        #print(vertex)
-        #print(new_dna)
-        #print(dna_out[vertex[1]])
-
-        print(vertex[0], vertex[1])
-
-        overlap = graph[[vertex[0]-1] [vertex[1]-1]]
-        #new_dna += dna_out[vertex[1]][config.N_DNA_CUT-overlap::]
-        #print(new_dna)
-        #new_dna += dna_out[vertex[1]]
+        overlap = config.N_DNA_CUT - check_overlap(dna_out[vertex[0]], dna_out[vertex[1]])
+        print(dna_out[vertex[0]], overlap, dna_out[vertex[1]])
 
         
     

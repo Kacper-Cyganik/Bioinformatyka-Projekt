@@ -39,7 +39,8 @@ class AntColony(object):
             # print (shortest_path)
             if shortest_path[1] < all_time_shortest_path[1]:
                 all_time_shortest_path = shortest_path            
-            self.pheromone = self.pheromone * self.decay            
+            self.pheromone = self.pheromone * self.decay 
+        print(type(all_time_shortest_path))           
         return all_time_shortest_path
 
     def spread_pheronome(self, all_paths, n_best, shortest_path):

@@ -98,22 +98,23 @@ def include_errors(start_neg:int, dict_data:dict, n_positives:int, n_negitves:in
 
 def check_overlap(first:str, second:str) ->int:
     '''
-    returns how many nucletides overlap (for example: heck_overlap('ACTAGACT', 'CTAGACTG')->7)
+    returns how many nucletides overlap (for example: heck_overlap('ACTAGACT', 'CTAGACTG')->)
     '''
     k = len(first)
     overlap = 0
     for i in range(k-1,0,-1):
         first_suffix = first[i:]
         second_prefix = second[:k-i]
-        #print(first_suffix, second_prefix)
-        if first_suffix == second_prefix and i<overlap:
-            overlap = i
+        print(first_suffix, second_prefix)
+        if first_suffix == second_prefix:
+            if i>overlap:
+                overlap = i
     return overlap
 
 
 
-# if __name__ == '__main__':
-#     print(check_overlap('ala', 'ala'))
+if __name__ == '__main__':
+    print(check_overlap('ABCDEFGH', 'BCDEFGHY'))
 
 
 
@@ -123,7 +124,7 @@ def generate_graph(data:list):
     returns grap representation of given data
     '''
     n = len(data)
-    graph = [[0 for x in range(n)] for y in range(n)] # create NxN matrix of zeros
+    graph = [[999 for x in range(n)] for y in range(n)] # create NxN matrix of zeros
     for i in range(n):
         for j in range(n):
             if i!=j:
@@ -132,7 +133,7 @@ def generate_graph(data:list):
                     graph[i][j]=overlap+1
 
     for i in range(len(graph[0])):
-        graph[i][i] = np.inf
+        graph[i][i] = 999
     return np.array(graph)
 
 # print(check_overlap('ABCDEFGH', 'BCDEFGHY'))
@@ -147,13 +148,20 @@ def hamming_distance(string1, string2):
 
 def find_sequence_in_graph(path, graph, dna_out):
     new_dna = ''
-    for vertex in path:
-        print(new_dna)
-        print(dna_out[vertex[1]])
-        overlap = graph[vertex[0][vertex[1]]]
-        new_dna += dna_out[vertex[1]][config.N_DNA_CUT-overlap::]
-        print(new_dna)
-        new_dna += dna_out[vertex[1]]
+    print('path')
+    print(path[0])
+    print('path')
+    for vertex in path[0]:
+        #print(vertex)
+        #print(new_dna)
+        #print(dna_out[vertex[1]])
+
+        print(vertex[0], vertex[1])
+
+        overlap = graph[[vertex[0]-1] [vertex[1]-1]]
+        #new_dna += dna_out[vertex[1]][config.N_DNA_CUT-overlap::]
+        #print(new_dna)
+        #new_dna += dna_out[vertex[1]]
 
         
     

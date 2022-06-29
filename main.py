@@ -27,25 +27,10 @@ if __name__ == "__main__":
     utils.include_errors(my_sum, repetitions, positive_errors, negative_errors, N_DNA_CUT)
     dna_out = sorted(list(repetitions.keys()))
 
-    #print('-----------')
-    #print(dna_out)
-    #print('-----------')
-    #print(utils.generate_graph(dna_out))
     graph = utils.generate_graph(dna_out)
+    print('----------')
     #print(graph)
-    # import numpy
-    # with numpy.printoptions(threshold=numpy.inf):
-    #     print(graph)
-    import numpy as np
-    #print(graph)
-    # graph = np.array([[np.inf, 2, 2, 5, 7],
-    #                   [2, np.inf, 4, 8, 2],
-    #                   [2, 4, np.inf, 1, 3],
-    #                   [5, 8, 1, np.inf, 2],
-    #                   [7, 2, 3, 2, np.inf]])
-    # print('----------------')
-    # print(graph)
-
+    print('----------')
     ant_colony = AntColony(graph, 1, 1, 100, 0.95, alpha=1, beta=1)
     shortest_path = ant_colony.run()
     for i in shortest_path:

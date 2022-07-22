@@ -4,12 +4,28 @@ from time import time
 import itertools
 import numpy as np
 import config
+
+
+def timing_decorator(f):
+    '''
+    measures time of executing method 'f'
+    '''
+    @wraps(f)
+    def wrap(*args, **kw):
+        ts = time()
+        result = f(*args, **kw)
+        te = time()
+        # print(f'func :{f.__name__} args:{args} took: {te-ts}')
+        return result
+    return wrap
+
+
 def generate_dna(n: int) -> str:
     '''
     returns string containing of with a length of 'n'
     '''
     nucleotides = ('A', 'T', 'G', 'C')
-    return ''.join(choice(nucleotides) for i in range(n))
+    return ''.join(choice(nucleotides) for _ in range(n))
 
 
 def write_dna_to_file(data: str, path: str):
@@ -37,20 +53,6 @@ def cut_dna(dna: str, k: int) -> list:
     return [dna[i: j] for i in range(len(dna)) for j in range(i + 1, len(dna) + 1) if len(dna[i:j]) == k]
 
 
-def timing_decorator(f):
-    '''
-    measures time of executing method 'f'
-    '''
-    @wraps(f)
-    def wrap(*args, **kw):
-        ts = time()
-        result = f(*args, **kw)
-        te = time()
-        # print(f'func :{f.__name__} args:{args} took: {te-ts}')
-        return result
-    return wrap
-
-
 def generate_all_combinations(n: int) -> list:
     '''
     returns list of all possible sequences
@@ -60,7 +62,7 @@ def generate_all_combinations(n: int) -> list:
     return output
 
 
-def generate_repetitions(data:dict):
+def generate_repetitions(data: dict):
     '''
     generate dict that contains repetitions of oligonucleotides
     '''
@@ -76,7 +78,7 @@ def generate_repetitions(data:dict):
     return my_sum, output
 
 
-def include_errors(start_neg:int, dict_data:dict, n_positives:int, n_negitves:int, oligo_len:int) -> None:
+def include_errors(start_neg: int, dict_data: dict, n_positives: int, n_negitves: int, oligo_len: int) -> None:
     '''
     include positive and negative errors to dict_data
     '''
@@ -96,41 +98,41 @@ def include_errors(start_neg:int, dict_data:dict, n_positives:int, n_negitves:in
             dict_data[new] = 1  # być może losowo?
             positive_index += 1
 
-def check_overlap(first:str, second:str) ->int:
+
+def check_overlap(first: str, second: str) -> int:
     '''
-    returns how many nucletides overlap (for example: heck_overlap('ACTAGACT', 'CTAGACTG')->)
+    returns how many nucletides overlap (for example: check_overlap('ACTAGACT', 'CTAGACTG')->)
     '''
     k = len(first)
     overlap = 0
-    for i in range(k-1,0,-1):
+    for i in range(k-1, 0, -1):
         first_suffix = first[i:]
         second_prefix = second[:k-i]
         #print(first_suffix, second_prefix)
         if first_suffix == second_prefix:
-            if i>overlap:
+            if i > overlap:
                 overlap = i
     return overlap
-
 
 
 if __name__ == '__main__':
     print(check_overlap('ABCDEFGH', 'BCDEFGHY'))
 
 
-
 @timing_decorator
-def generate_graph(data:list):
+def generate_graph(data: list):
     '''
     returns grap representation of given data
     '''
     n = len(data)
-    graph = [[999 for x in range(n)] for y in range(n)] # create NxN matrix of zeros
+    # create NxN matrix of zeros
+    graph = [[999 for x in range(n)] for y in range(n)]
     for i in range(n):
         for j in range(n):
-            if i!=j:
+            if i != j:
                 overlap = check_overlap(data[i], data[j])
-                if overlap<=4: # if overlap is big enough, add edge
-                    graph[i][j]=overlap+1
+                if overlap <= 4:  # if overlap is big enough, add edge
+                    graph[i][j] = overlap+1
 
     for i in range(len(graph[0])):
         graph[i][i] = 999
@@ -146,13 +148,11 @@ def hamming_distance(string1, string2):
             dist_counter += 1
     return dist_counter
 
+
 def find_sequence_in_graph(path, graph, dna_out):
     new_dna = ''
     for vertex in path[0]:
-        overlap = config.N_DNA_CUT - check_overlap(dna_out[vertex[0]], dna_out[vertex[1]])
+        overlap = config.N_DNA_CUT - \
+            check_overlap(dna_out[vertex[0]], dna_out[vertex[1]])
         print(dna_out[vertex[0]], overlap, dna_out[vertex[1]])
-
-        
-    
-
 

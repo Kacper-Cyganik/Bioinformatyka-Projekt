@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     graph = utils.generate_graph(dna_out)
     # print(graph)
-    initNode = dna_out[0]
+    initNode = dna_cut[0]
     initNodeIndex = 0
     for count, value in enumerate(dna_out):
         if(value == initNode):
@@ -36,5 +36,8 @@ if __name__ == "__main__":
     #print(oligo)
     print('Ostateczne wyniki: ')
     print(topTen[0])
+    print("------")
+    print(dna)
+    print(utils.squash(topTen[0][0]))
 
 

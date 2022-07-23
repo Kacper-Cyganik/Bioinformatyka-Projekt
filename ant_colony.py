@@ -1,40 +1,67 @@
 import numpy as np
 
+def goalFunction(solution, maxLen, spectGraph, oligo):
+    oligolen = len(solution[0])
+    maxcov = maxLen/oligolen * (oligolen-1)
+    α = 0.7
+    β = 1 - α
+    A = 0
+    B = oligolen
+    for i in range(0, len(solution)-1):
+        oligo1 = solution[i]
+        oligo2 = solution[i+1]
+        overlap = checkCov(oligo1, oligo2)
+        A += oligolen - overlap 
+        B += overlap
+    A = ((maxcov - A)/maxcov)*α
+    B = (abs(maxLen - B)/maxLen)*β
+    result = B + A
+    return result
+
+def checkCov(oligo1, oligo2):
+    matching = 0
+    for j in range(0, len(oligo1)+1):
+        finish = False
+        for k in range(0, matching):
+            end = oligo1[len(oligo1)-matching+k]
+            start = oligo2[k]
+            if (end != start):
+                finish = True
+                break
+        if(finish):
+            break
+        matching += 1
+    return len(oligo1) - matching + 1
+
 def generateSolution(oligo, initNodeIndex, initNode, maxLen, spectOligos, weights, spectGraph, probabilities):
     solution = []
     solution.append(initNode)
-    currLen = len(initNode)
+    oligolen = len(initNode)
+    currLen = oligolen
     currIndex = initNodeIndex
-    length = 1
     
-    while(currLen < maxLen):
+    while True:
+        if sum(weights[currIndex]) == 0:
+            return solution, goalFunction(solution, maxLen, spectGraph, oligo)
         choiceOligo = np.random.choice(oligo, p=weights[currIndex])
         choice = oligo.index(choiceOligo)
-        choiceCost = spectGraph[currIndex][choice]
+        overlap = checkCov(oligo[currIndex], oligo[choice])
         probabilities[currIndex][choice] /= 2
         for i in range(0, len(oligo)):
             weights[currIndex][i] = probabilities[currIndex][i]/sum(probabilities[currIndex])
-
-        #print(choiceOligo, choice, choiceCost, weights[currIndex][choice])
-        #print(weights[currIndex])
-
-        currLen += (len(initNode) - choiceCost)
-        if (currLen > maxLen):
-            currLen -= (len(initNode) - choiceCost)
-            currIndex = choice
-            return solution, length/spectOligos
+        currLen += overlap
         solution.append(oligo[choice])
         currIndex = choice
-        length += 1
-    #print(solution)
-    return solution, length/spectOligos
+        if currLen + overlap > maxLen:
+            return solution, goalFunction(solution, maxLen, spectGraph, oligo)
 
 def generateSolutions(colonySize, oligo, initNodeIndex, initNode, maxLen, spectOligos, probabilities, spectGraph):
     solutions = []
     weights = [[0 for column in range(len(oligo))] for row in range(len(oligo))]
     for i in range(0, len(oligo)):
         for j in range(0, len(oligo)):
-            weights[i][j] = probabilities[i][j]/sum(probabilities[i])
+            if sum(probabilities[i]) != 0:
+                weights[i][j] = probabilities[i][j]/sum(probabilities[i])
     #print(weights)
     for i in range(0, colonySize):
         solutions.append(generateSolution(oligo, initNodeIndex, initNode, maxLen, spectOligos, weights, spectGraph, probabilities))
@@ -42,8 +69,8 @@ def generateSolutions(colonySize, oligo, initNodeIndex, initNode, maxLen, spectO
 
 def compareSolutions(solutions):
     topTen = []
-    solutions.sort(key=lambda row: (row[1]), reverse=True)
-    for i in range(0, 19):
+    solutions.sort(key=lambda row: (row[1]))
+    for i in range(0, 10):
         topTen.append(solutions[i])
     return topTen
 
@@ -71,6 +98,7 @@ def antColony(spectGraph, oligo, initNodeIndex, initNode, maxLen, spectOligos):
     for i in range(0, len(oligo)):
         for j in range(0, len(oligo)):
             probabilities[i][j] = spectGraph[i][j]
+        print(probabilities)
     i = 0
     while (i < generations):
         solutions = generateSolutions(colonySize, oligo, initNodeIndex, initNode, maxLen, spectOligos, probabilities, spectGraph)

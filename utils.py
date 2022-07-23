@@ -5,6 +5,26 @@ import itertools
 import numpy as np
 import config
 
+def squash(tab):
+    result = tab[0]
+    for i in range(0, len(tab)-1):
+        oligo1 = tab[i]
+        oligo2 = tab[i+1]
+        matching = 0
+        for j in range(0, len(oligo1)+1):
+            finish = False
+            for k in range(0, matching):
+                end = oligo1[len(oligo1)-matching+k]
+                start = oligo2[k]
+                if (end != start):
+                    finish = True
+                    break
+            if(finish):
+                break
+            matching += 1
+        matching -= 1
+        result += oligo2[matching:]
+    return result
 
 def timing_decorator(f):
     '''
@@ -128,7 +148,7 @@ def generate_graph(data: list):
         for j in range(n):
             if i != j:
                 overlap = check_overlap(data[i], data[j])
-                if overlap <= 4:  # if overlap is big enough, add edge
+                if overlap <= 2:  # if overlap is big enough, add edge
                     graph[i][j] = config.N_DNA_CUT-overlap
 
     # for i in range(len(graph[0])):

@@ -99,46 +99,47 @@ def include_errors(start_neg: int, dict_data: dict, n_positives: int, n_negitves
             positive_index += 1
 
 
-def check_overlap(first: str, second: str) -> int:
+def check_overlap(word1: str, word2: str) -> int:
     '''
     returns how many nucletides overlap (for example: check_overlap('ACTAGACT', 'CTAGACTG')->)
     '''
-    k = len(first)
-    overlap = 0
-    for i in range(k-1, 0, -1):
-        first_suffix = first[i:]
-        second_prefix = second[:k-i]
-        #print(first_suffix, second_prefix)
-        if first_suffix == second_prefix:
-            if i > overlap:
-                overlap = i
-    return overlap
+    if (word1 == word2):
+        return len(word1)
+    else:
+        for i in range(1, len(word1)):
+            newWord1 = word1[i:]
+            newWord2 = word2[:len(word1)-i]
+            if(newWord1 == newWord2):
+                return i
+        return len(word1)   
 
 
 if __name__ == '__main__':
     print(check_overlap('ABCDEFGH', 'BCDEFGHY'))
 
-
-@timing_decorator
 def generate_graph(data: list):
     '''
     returns grap representation of given data
     '''
     n = len(data)
     # create NxN matrix of zeros
-    graph = [[999 for x in range(n)] for y in range(n)]
+    graph = [[0 for x in range(n)] for y in range(n)]
     for i in range(n):
         for j in range(n):
             if i != j:
                 overlap = check_overlap(data[i], data[j])
                 if overlap <= 4:  # if overlap is big enough, add edge
-                    graph[i][j] = overlap+1
+                    graph[i][j] = config.N_DNA_CUT-overlap
 
-    for i in range(len(graph[0])):
-        graph[i][i] = 999
+    # for i in range(len(graph[0])):
+    #     graph[i][i] = 999
+
+    my_list = []
+    # for row in graph:
+    #     my_list +=row
+    # print(set(my_list))
+
     return np.array(graph)
-
-# print(check_overlap('ABCDEFGH', 'BCDEFGHY'))
 
 
 def hamming_distance(string1, string2):
@@ -147,12 +148,3 @@ def hamming_distance(string1, string2):
         if string1[n] != string2[n]:
             dist_counter += 1
     return dist_counter
-
-
-def find_sequence_in_graph(path, graph, dna_out):
-    new_dna = ''
-    for vertex in path[0]:
-        overlap = config.N_DNA_CUT - \
-            check_overlap(dna_out[vertex[0]], dna_out[vertex[1]])
-        print(dna_out[vertex[0]], overlap, dna_out[vertex[1]])
-

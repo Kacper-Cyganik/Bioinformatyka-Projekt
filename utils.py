@@ -1,15 +1,21 @@
 from random import choice
-from functools import wraps
-from time import time
-import itertools
 import numpy as np
 import config
 
-def squash(tab):
-    result = tab[0]
-    for i in range(0, len(tab)-1):
-        oligo1 = tab[i]
-        oligo2 = tab[i+1]
+
+def squash(arr: list) -> str:
+    """Generates string from list of nucleotides excluding overlaping sequences
+
+    Args:
+        arr (list): list of k-length nucleotides
+
+    Returns:
+        str: string created from list of nucleotides.
+    """
+    result = arr[0]
+    for i in range(0, len(arr)-1):
+        oligo1 = arr[i]
+        oligo2 = arr[i+1]
         matching = 0
         for j in range(0, len(oligo1)+1):
             finish = False
@@ -26,65 +32,80 @@ def squash(tab):
         result += oligo2[matching:]
     return result
 
-def timing_decorator(f):
-    '''
-    measures time of executing method 'f'
-    '''
-    @wraps(f)
-    def wrap(*args, **kw):
-        ts = time()
-        result = f(*args, **kw)
-        te = time()
-        # print(f'func :{f.__name__} args:{args} took: {te-ts}')
-        return result
-    return wrap
-
 
 def generate_dna(n: int) -> str:
-    '''
-    returns string containing of with a length of 'n'
-    '''
+    """Returns string containing of with a length of 'n'
+
+    Args:
+        n (int): length of final DNA sequence
+
+    Returns:
+        str: string containing of with a length of 'n'
+    """
     nucleotides = ('A', 'T', 'G', 'C')
     return ''.join(choice(nucleotides) for _ in range(n))
 
 
-def write_dna_to_file(data: str, path: str):
-    '''
-    writes single string to file
-    '''
+def write_dna_to_file(data: str, path: str) -> None:
+    """Writes single string to file
+
+    Args:
+        data (str): string
+        path (str): path to file
+    """
     with open(path, 'w') as f:
         f.write(str(data))
 
 
 def read_dna_from_file(path: str) -> str:
-    '''
-    reads single string from file
-    '''
+    """Reads single string to file
+
+    Args:
+        data (str): string
+        path (str): path to file
+    """
     with open(path, 'r') as f:
         return f.read()
 
 
 def cut_dna(dna: str, k: int) -> list:
-    '''
-    returns list of substrings with a length of 'k' from single string
-    '''
-    # index = 0
-    # while index <
+    """Generates list of substrings with a length of 'k' from single string
+
+    Args:
+        dna (str): DNA sequence to cut
+        k (int): length of each nucleotide
+
+    Returns:
+        list: list of nucleotides created from dna
+    """
     return [dna[i: j] for i in range(len(dna)) for j in range(i + 1, len(dna) + 1) if len(dna[i:j]) == k]
 
 
-def generate_all_combinations(n: int) -> list:
-    '''
-    returns list of all possible sequences
-    '''
-    nucleotides = 'ACGT'
-    output = list(itertools.product(nucleotides, repeat=n))
-    return output
+# def generate_all_combinations(n: int) -> list:
+#     """Creates list of all possible sequences
+
+#     Args:
+#         n (int):
+
+#     Returns:
+#         list: _description_
+#     """
+#     nucleotides = 'ACGT'
+#     output = list(itertools.product(nucleotides, repeat=n))
+#     return output
 
 
-def generate_repetitions(data: dict):
+def generate_repetitions(data: list) -> tuple:
+    """Calculate number of repetitions of each nucleotide in given list
+
+    Args:
+        data (list): list of nucleotides 
+
+    Returns:
+        my_sum (int): number of nucleotides where negative errors occur
+        output (dict): dict containing nucleotide as key and number of its repetitions as value
+    """
     '''
-    generate dict that contains repetitions of oligonucleotides
     '''
     output = {}
     my_sum = 0
@@ -99,10 +120,16 @@ def generate_repetitions(data: dict):
 
 
 def include_errors(start_neg: int, dict_data: dict, n_positives: int, n_negitves: int, oligo_len: int) -> None:
-    '''
-    include positive and negative errors to dict_data
-    '''
-    # negatives
+    """Include positive and negative errors
+    Args:
+        start_neg (int): initial number of negative errors
+        dict_data (dict): dictionary containing nucleotides with its number of repetitions
+        n_positives (int): desired number of positive errors in output data
+        n_negitves (int): desired number of positive errors in output data
+        oligo_len (int): length of each nucleotide 
+    """
+    
+    # negative errors
     negative_index = start_neg
     while negative_index < n_negitves:
         to_delete_index = choice(list(dict_data.keys()))
@@ -110,7 +137,7 @@ def include_errors(start_neg: int, dict_data: dict, n_positives: int, n_negitves
             negative_index += 1
         dict_data.pop(to_delete_index)
 
-    # positives
+    # positive errors
     positive_index = 0
     while positive_index < n_positives:
         new = generate_dna(oligo_len)
@@ -119,9 +146,17 @@ def include_errors(start_neg: int, dict_data: dict, n_positives: int, n_negitves
             positive_index += 1
 
 
-def check_overlap(word1: str, word2: str) -> int:
+def _check_overlap(word1: str, word2: str) -> int:
+    """Calculates how many nucleotides DOES NOT overlap (for example: check_overlap('ABCDEFGH', 'BCDEFGHY')->1)
+
+    Args:
+        word1 (str): first word to compare
+        word2 (str): second word to compare
+
+    Returns:
+        int: number of NOT OVERLAPING chars
+    """
     '''
-    returns how many nucletides overlap (for example: check_overlap('ACTAGACT', 'CTAGACTG')->)
     '''
     if (word1 == word2):
         return len(word1)
@@ -131,40 +166,30 @@ def check_overlap(word1: str, word2: str) -> int:
             newWord2 = word2[:len(word1)-i]
             if(newWord1 == newWord2):
                 return i
-        return len(word1)   
+        return len(word1)
 
-
-if __name__ == '__main__':
-    print(check_overlap('ABCDEFGH', 'BCDEFGHY'))
 
 def generate_graph(data: list):
-    '''
-    returns grap representation of given data
-    '''
+    """Generate graph represented as 2d matrix 
+
+    Args:
+        data (list): 2d list of integers
+
+    Returns:
+        _type_: graph created from data
+    """
     n = len(data)
+
     # create NxN matrix of zeros
     graph = [[0 for x in range(n)] for y in range(n)]
     for i in range(n):
         for j in range(n):
             if i != j:
-                overlap = check_overlap(data[i], data[j])
+                overlap = _check_overlap(data[i], data[j])
                 if overlap <= 2:  # if overlap is big enough, add edge
                     graph[i][j] = config.N_DNA_CUT-overlap
-
-    # for i in range(len(graph[0])):
-    #     graph[i][i] = 999
-
-    my_list = []
-    # for row in graph:
-    #     my_list +=row
-    # print(set(my_list))
-
     return np.array(graph)
 
 
-def hamming_distance(string1, string2):
-    dist_counter = 0
-    for n in range(len(string1)):
-        if string1[n] != string2[n]:
-            dist_counter += 1
-    return dist_counter
+if __name__ == '__main__':
+    print(_check_overlap('ABCDEFGH', 'BCDEFGHY'))

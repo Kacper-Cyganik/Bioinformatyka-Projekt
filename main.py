@@ -1,7 +1,6 @@
 import utils
 from config import N_NEGATIVES, N_POSITIVES, N_DNA, N_DNA_CUT
-from ant_colony import antColony
-
+from ant_colony import ACO
 
 def main():
 
@@ -32,7 +31,9 @@ def main():
             initNodeIndex = count
 
     # Run ACO
-    topTen = antColony(graph, dna_out, initNodeIndex,
+    aco = ACO()
+
+    topTen = aco.run(graph, dna_out, initNodeIndex,
                        initNode, N_DNA, len(dna_cut))
     print('Ostateczne wyniki: ')
     print(topTen[0])

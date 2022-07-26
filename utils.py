@@ -146,7 +146,7 @@ def include_errors(start_neg: int, dict_data: dict, n_positives: int, n_negitves
             positive_index += 1
 
 
-def _check_overlap(word1: str, word2: str) -> int:
+def check_overlap(word1: str, word2: str) -> int:
     """Calculates how many nucleotides DOES NOT overlap (for example: check_overlap('ABCDEFGH', 'BCDEFGHY')->1)
 
     Args:
@@ -185,11 +185,11 @@ def generate_graph(data: list):
     for i in range(n):
         for j in range(n):
             if i != j:
-                overlap = _check_overlap(data[i], data[j])
+                overlap = check_overlap(data[i], data[j])
                 if overlap <= 2:  # if overlap is big enough, add edge
                     graph[i][j] = config.N_DNA_CUT-overlap
     return np.array(graph)
 
 
 if __name__ == '__main__':
-    print(_check_overlap('ABCDEFGH', 'BCDEFGHY'))
+    print(check_overlap('ABCDEFGH', 'BCDEFGHY'))

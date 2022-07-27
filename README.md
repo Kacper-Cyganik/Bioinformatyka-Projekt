@@ -26,6 +26,9 @@ części będzie zależeć moja wstępna opinia / ocena projektu).
 ## Pomiary
 TODO
 
+## Pomiary
+TODO
+
 ## Wyniki
 TODO
 

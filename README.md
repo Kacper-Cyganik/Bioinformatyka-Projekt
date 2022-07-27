@@ -1,7 +1,7 @@
 # Problem SBH z informacją o powtórzeniach oraz wszystkimi rodzajami błędów - implementacja algorytmu mrówkowego 
 
 ## Opis problemu
-TODO
+Implementacja algorytmu, który dla dowolnego spektrum, także z błędami, będzie szukać ścieżki w grafie ze spektrum o odpowiedniej długości i tym samym rekonstruować DNA z kawałków (oligonukleotydów) symulując działanie metody sekwencjonowania przed hybrydyzację.
 ### Dane
 - Znana długość DNA (n), 
 - Znana długość oligonukleotydów (k),
@@ -13,12 +13,12 @@ niż dwa razy, czyli: (1, 2, *)
 ## Opis rozwiązania
 TODO
 
+## Pomiary
+TODO
+
 ## Wyniki
 TODO
 
-
-## Pomiary
-TODO
 
 ## Wnioski
 TODO

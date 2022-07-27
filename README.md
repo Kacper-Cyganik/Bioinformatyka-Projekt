@@ -1,7 +1,7 @@
 # Problem SBH z informacją o powtórzeniach oraz wszystkimi rodzajami błędów - implementacja algorytmu mrówkowego 
 
 ## Opis problemu
-TODO
+Implementacja algorytmu, który dla dowolnego spektrum, także z błędami, będzie szukać ścieżki w grafie ze spektrum o odpowiedniej długości i tym samym rekonstruować DNA z kawałków (oligonukleotydów) symulując działanie metody sekwencjonowania przed hybrydyzację.
 ### Dane
 - Znana długość DNA (n), 
 - Znana długość oligonukleotydów (k),
@@ -11,14 +11,24 @@ TODO
 niż dwa razy, czyli: (1, 2, *)
 
 ## Opis rozwiązania
+```
+Opis algorytmu – proszę o dokładny opis, np. jeśli algorytm genetyczny, to oczekuję
+dokładnego opisu jak działają krzyżowanie, mutacja i selekcja, jeśli to Tabu Search, to znowu:
+jak działa lista tabu, czy jest kryterium aspiracji, czy algorytm ma jakieś sposoby radzenie
+sobie z optimami lokalnymi w które TS lubi wpadać, itd. Tak samo w przypadku innych
+algorytmów, zarówno tych typowych i takich bardziej autorskich – chciałbym mieć szansę
+zrozumieć, jak działa algorytm bez potrzeby dokładnej analizy linia po linii kodu programu.
+
+o Testy i wyniki testów w formie tabel i wykresów (o tym obszernie dalej, głównie od jakości tej
+części będzie zależeć moja wstępna opinia / ocena projektu).
+```
+
+## Pomiary
 TODO
 
 ## Wyniki
 TODO
 
-
-## Pomiary
-TODO
 
 ## Wnioski
 TODO

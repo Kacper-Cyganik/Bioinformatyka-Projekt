@@ -13,6 +13,20 @@ def squash(arr: list) -> str:
         str: string created from list of nucleotides.
     """
     result = arr[0]
+    oligosize = len(arr[0])
+    for i in range(0, len(arr)-1):
+        oligo1 = arr[i]
+        oligo2 = arr[i+1]
+        if oligo1 == oligo2:
+            result += oligo2
+        else:
+            for j in range(oligosize-1, 0, -1):
+                if oligo1[oligosize-j:] == oligo2[:j]:
+                    result += oligo2[j:]
+                    break
+    return result
+
+    """result = arr[0]
     for i in range(0, len(arr)-1):
         oligo1 = arr[i]
         oligo2 = arr[i+1]
@@ -30,7 +44,7 @@ def squash(arr: list) -> str:
             matching += 1
         matching -= 1
         result += oligo2[matching:]
-    return result
+    return result, matching"""
 
 
 def generate_dna(n: int) -> str:
@@ -111,7 +125,7 @@ def generate_repetitions(data: list) -> tuple:
     my_sum = 0
     for i in data:
         x = data.count(i)
-        output[i] = x if x < 3 else '*'
+        output[i] = x if x < 5 else '*'
 
     for i in output:
         if output[i] != 1:
@@ -186,10 +200,10 @@ def generate_graph(data: list):
         for j in range(n):
             if i != j:
                 overlap = check_overlap(data[i], data[j])
-                if overlap <= 2:  # if overlap is big enough, add edge
+                if overlap <= 3:  # if overlap is big enough, add edge
                     graph[i][j] = config.N_DNA_CUT-overlap
     return np.array(graph)
 
 
 if __name__ == '__main__':
-    print(check_overlap('ABCDEFGH', 'BCDEFGHY'))
+    print("AATTCCGCTC\n" + squash(['AATTCCGC', 'TTCCGCTC']))

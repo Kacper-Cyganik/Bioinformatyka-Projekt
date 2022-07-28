@@ -1,12 +1,12 @@
+from traceback import print_tb
 import utils
 from config import N_NEGATIVES, N_POSITIVES, N_DNA, N_DNA_CUT
 from ant_colony import ACO
 
-
 def main():
 
     # Generate DNA of length n
-    dna = utils.generate_dna(n=N_DNA)
+    dna = "GCGCGTCGTT" #utils.generate_dna(n=N_DNA)
 
     # Cut DNA into k-length nucleotides
     dna_cut = utils.cut_dna(dna, N_DNA_CUT)
@@ -32,7 +32,7 @@ def main():
             initNodeIndex = count
 
     # Run ACO
-    aco = ACO(alpha=1, beta=7, colony_size=50, generations=10, evaporation_rate=0.65, spect_graph=graph,
+    aco = ACO(alpha=1, beta=7, colony_size=20, generations=5, evaporation_rate=0.65, spect_graph=graph,
               oligo=dna_out, init_node_index=initNodeIndex, init_node=initNode, max_len=N_DNA, spect_oligo=len(dna_cut))
 
     topTen = aco.run()

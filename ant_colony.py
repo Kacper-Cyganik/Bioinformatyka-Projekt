@@ -51,25 +51,21 @@ class ACO:
         Returns:
             int : result
         """
-        oligolen = len(solution[0])
-        maxcov = self.max_len/oligolen * (oligolen-1)
 
         a = 0.7
         b = 1 - a
 
+        oligolen = len(solution[0])
+        maxcov = self.max_len/oligolen * (oligolen-1)
+        maxnodes = self.max_len - oligolen + 1
         A = 0
-        B = oligolen
-
+        B = len(solution)
         for i in range(0, len(solution)-1):
             oligo1 = solution[i]
             oligo2 = solution[i+1]
             overlap = N_DNA_CUT-utils.check_overlap(oligo1, oligo2)+1
             A += oligolen - overlap
-            B += overlap
-        A = ((maxcov - A)/maxcov)*a
-        B = (abs(self.max_len - B)/self.max_len)*b
-        result = B + A
-        return result
+        return a-((maxcov - A)/maxcov)*a + ((maxnodes - B)/maxnodes)*b
 
     def _generate_solution(self, weights):
         solution = []
@@ -79,13 +75,16 @@ class ACO:
         currIndex = self.init_node_index
 
         while True:
-            if sum(weights[currIndex]) == 0:
-                return solution, self._goal_function(solution)
+            if sum(weights[currIndex]) == 0: #no road to progress
+                if len(utils.squash(solution)) != self.max_len:
+                    return [solution, abs(len(utils.squash(solution)) - self.max_len)] #throw away this solution
+                else:
+                    return [solution, self._goal_function(solution)] #I guess it was just the end
+            if len(utils.squash(solution)) == self.max_len: #the length checks out
+                return [solution, self._goal_function(solution)] #It's a passible solution
             choiceOligo = np.random.choice(self.oligo, p=weights[currIndex])
             choice = self.oligo.index(choiceOligo)
-            overlap = N_DNA_CUT - \
-                utils.check_overlap(
-                    self.oligo[currIndex], self.oligo[choice])+1
+            overlap = utils.check_overlap(self.oligo[currIndex], self.oligo[choice])+1
             self.probabilities[currIndex][choice] /= 2
             for i in range(0, len(self.oligo)):
                 weights[currIndex][i] = self.probabilities[currIndex][i] / \
@@ -93,8 +92,7 @@ class ACO:
             currLen += overlap
             solution.append(self.oligo[choice])
             currIndex = choice
-            if currLen + overlap > self.max_len:
-                return solution, self._goal_function(solution)
+
 
     def _generate_solutions(self):
         solutions = []
@@ -116,7 +114,6 @@ class ACO:
         return topTen
 
     def _pheromone_update(self, topTen):
-
         currIndex = 0
         nextIndex = 0
         for i in range(0, len(topTen)):
@@ -134,13 +131,10 @@ class ACO:
         i = 0
         while (i < self.generations):
             solutions = self._generate_solutions()
-            # print(solutions)
             topTen = self._compare_solutions(solutions)
-            #print('Nowe wyniki')
             print(topTen[0][-1])
 
             pheromones = self._pheromone_update(topTen)
-            # print(pheromones)
 
             for j in range(0, len(self.oligo)):
                 for k in range(0, len(self.oligo)):
@@ -150,7 +144,7 @@ class ACO:
                     else:
                         self.probabilities[j][k] = 0.1**self.alpha * \
                             self.spect_graph[j][k]**self.beta
-            # print(probabilities)
+            print(self.probabilities)
             i += 1
         return topTen
 

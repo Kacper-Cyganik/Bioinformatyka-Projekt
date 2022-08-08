@@ -52,7 +52,7 @@ class ACO:
             int : result
         """
 
-        a = 0.7
+        a = 0.6
         b = 1 - a
 
         oligolen = len(solution[0])
@@ -82,13 +82,22 @@ class ACO:
                     return [solution, self._goal_function(solution)] #I guess it was just the end
             if len(utils.squash(solution)) == self.max_len: #the length checks out
                 return [solution, self._goal_function(solution)] #It's a passible solution
-            choiceOligo = np.random.choice(self.oligo, p=weights[currIndex])
+            # print('-------------------------------')
+            # print('aaaa')
+            # print(self.oligo, len(self.oligo))
+            # print(len(weights[currIndex]))
+            # print('bbbb')
+            # print('-------------------------------')
+            
+            #normalized_weights = (weights[currIndex] - min(weights[currIndex])) / (max(weights[currIndex]) - min(weights[currIndex])) # normalize probabilites to <0..1>
+            normalized_weights = weights[currIndex].copy()
+            normalized_weights /= sum(normalized_weights) # normalize probabilites to <0..1>
+            choiceOligo = np.random.choice(self.oligo, p=normalized_weights)
             choice = self.oligo.index(choiceOligo)
             overlap = utils.check_overlap(self.oligo[currIndex], self.oligo[choice])+1
             self.probabilities[currIndex][choice] /= 2
             for i in range(0, len(self.oligo)):
-                weights[currIndex][i] = self.probabilities[currIndex][i] / \
-                    sum(self.probabilities[currIndex])
+                weights[currIndex][i] = self.probabilities[currIndex][i] / sum(self.probabilities[currIndex])
             currLen += overlap
             solution.append(self.oligo[choice])
             currIndex = choice
@@ -130,9 +139,10 @@ class ACO:
 
         i = 0
         while (i < self.generations):
+            print('generacja: ', i)
             solutions = self._generate_solutions()
             topTen = self._compare_solutions(solutions)
-            print(topTen[0][-1])
+            #print(topTen[0][-1])
 
             pheromones = self._pheromone_update(topTen)
 
@@ -144,7 +154,7 @@ class ACO:
                     else:
                         self.probabilities[j][k] = 0.1**self.alpha * \
                             self.spect_graph[j][k]**self.beta
-            print(self.probabilities)
+            #print(self.probabilities)
             i += 1
         return topTen
 

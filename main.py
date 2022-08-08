@@ -1,13 +1,14 @@
-from traceback import print_tb
 import utils
 from config import N_NEGATIVES, N_POSITIVES, N_DNA, N_DNA_CUT
 from ant_colony import ACO
 
 def main():
 
-    # Generate DNA of length n
-    dna = "GCGCGTCGTT" #utils.generate_dna(n=N_DNA)
 
+    # Generate DNA of length n
+    dna = utils.generate_dna(n=N_DNA)
+    #utils.write_dna_to_file(dna, 'data/dna500.txt')
+    #dna = utils.read_dna_from_file('data/dna200.txt')
     # Cut DNA into k-length nucleotides
     dna_cut = utils.cut_dna(dna, N_DNA_CUT)
     my_sum, repetitions = utils.generate_repetitions(dna_cut)
@@ -32,7 +33,7 @@ def main():
             initNodeIndex = count
 
     # Run ACO
-    aco = ACO(alpha=1, beta=7, colony_size=20, generations=5, evaporation_rate=0.65, spect_graph=graph,
+    aco = ACO(alpha=3, beta=6, colony_size=40, generations=10, evaporation_rate=0.6, spect_graph=graph,
               oligo=dna_out, init_node_index=initNodeIndex, init_node=initNode, max_len=N_DNA, spect_oligo=len(dna_cut))
 
     topTen = aco.run()
@@ -41,9 +42,13 @@ def main():
     print("------")
 
     # Print DNA
+    print('Original DNA')
     print(dna)
-    print(utils.squash(topTen[0][0]))
+    print('Found DNA')
+    result = utils.squash(topTen[0][0])
+    print(result)
 
+    utils.check_effectiveness(dna, result)
 
 if __name__ == "__main__":
     main()

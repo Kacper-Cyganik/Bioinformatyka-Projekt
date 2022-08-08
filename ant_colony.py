@@ -2,7 +2,6 @@ import numpy as np
 import utils
 from config import N_DNA_CUT
 
-
 class ACO:
 
     def __init__(self, alpha=1, beta=7, colony_size=50, generations=10, evaporation_rate=0.65, spect_graph=None, oligo=None, init_node_index=0, init_node=None, max_len=500, spect_oligo=None):
@@ -82,17 +81,21 @@ class ACO:
                     return [solution, self._goal_function(solution)] #I guess it was just the end
             if len(utils.squash(solution)) == self.max_len: #the length checks out
                 return [solution, self._goal_function(solution)] #It's a passible solution
-            # print('-------------------------------')
-            # print('aaaa')
-            # print(self.oligo, len(self.oligo))
-            # print(len(weights[currIndex]))
-            # print('bbbb')
-            # print('-------------------------------')
+           
             
             #normalized_weights = (weights[currIndex] - min(weights[currIndex])) / (max(weights[currIndex]) - min(weights[currIndex])) # normalize probabilites to <0..1>
-            normalized_weights = weights[currIndex].copy()
-            normalized_weights /= sum(normalized_weights) # normalize probabilites to <0..1>
-            choiceOligo = np.random.choice(self.oligo, p=normalized_weights)
+            #normalized_weights /= sum(normalized_weights) # normalize probabilites to <0..1>
+            #print('------------------------')
+            #print(weights[currIndex])
+            #print(normalized_weights)
+            #print('------------------------')
+            #normalized_weights = weights[currIndex].copy()
+            #nonzero = norms > 0
+
+            # Nie dziala, normalizacja ale trzeba wyłączyć 0
+            # Edit - też nie działa.
+
+            choiceOligo = np.random.choice(self.oligo, p=weights[currIndex])
             choice = self.oligo.index(choiceOligo)
             overlap = utils.check_overlap(self.oligo[currIndex], self.oligo[choice])+1
             self.probabilities[currIndex][choice] /= 2

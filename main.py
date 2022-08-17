@@ -33,7 +33,7 @@ def main():
             initNodeIndex = count
 
     # Run ACO
-    aco = ACO(alpha=3, beta=6, colony_size=40, generations=10, evaporation_rate=0.6, spect_graph=graph,
+    aco = ACO(alpha=10, beta=10, colony_size=60, generations=10, evaporation_rate=0.7, spect_graph=graph,
               oligo=dna_out, init_node_index=initNodeIndex, init_node=initNode, max_len=N_DNA, spect_oligo=len(dna_cut))
 
     topTen = aco.run()
@@ -48,7 +48,7 @@ def main():
     result = utils.squash(topTen[0][0])
     print(result)
 
-    utils.check_effectiveness(dna, result)
+    print(utils.check_effectiveness(dna, result))
 
 if __name__ == "__main__":
     main()

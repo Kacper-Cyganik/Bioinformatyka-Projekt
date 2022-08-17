@@ -2,6 +2,7 @@ import numpy as np
 import utils
 from config import N_DNA_CUT
 
+
 class ACO:
 
     def __init__(self, alpha=1, beta=7, colony_size=50, generations=10, evaporation_rate=0.65, spect_graph=None, oligo=None, init_node_index=0, init_node=None, max_len=500, spect_oligo=None):
@@ -74,37 +75,28 @@ class ACO:
         currIndex = self.init_node_index
 
         while True:
-            if sum(weights[currIndex]) == 0: #no road to progress
+            if sum(weights[currIndex]) == 0:  # no road to progress
                 if len(utils.squash(solution)) != self.max_len:
-                    return [solution, abs(len(utils.squash(solution)) - self.max_len)] #throw away this solution
+                    # throw away this solution
+                    return [solution, abs(len(utils.squash(solution)) - self.max_len)]
                 else:
-                    return [solution, self._goal_function(solution)] #I guess it was just the end
-            if len(utils.squash(solution)) == self.max_len: #the length checks out
-                return [solution, self._goal_function(solution)] #It's a passible solution
-           
-            
-            #normalized_weights = (weights[currIndex] - min(weights[currIndex])) / (max(weights[currIndex]) - min(weights[currIndex])) # normalize probabilites to <0..1>
-            #normalized_weights /= sum(normalized_weights) # normalize probabilites to <0..1>
-            #print('------------------------')
-            #print(weights[currIndex])
-            #print(normalized_weights)
-            #print('------------------------')
-            #normalized_weights = weights[currIndex].copy()
-            #nonzero = norms > 0
-
-            # Nie dziala, normalizacja ale trzeba wyłączyć 0
-            # Edit - też nie działa.
+                    # I guess it was just the end
+                    return [solution, self._goal_function(solution)]
+            if len(utils.squash(solution)) == self.max_len:  # the length checks out
+                # It's a passible solution
+                return [solution, self._goal_function(solution)]
 
             choiceOligo = np.random.choice(self.oligo, p=weights[currIndex])
             choice = self.oligo.index(choiceOligo)
-            overlap = utils.check_overlap(self.oligo[currIndex], self.oligo[choice])+1
+            overlap = utils.check_overlap(
+                self.oligo[currIndex], self.oligo[choice])+1
             self.probabilities[currIndex][choice] /= 2
             for i in range(0, len(self.oligo)):
-                weights[currIndex][i] = self.probabilities[currIndex][i] / sum(self.probabilities[currIndex])
+                weights[currIndex][i] = self.probabilities[currIndex][i] / \
+                    sum(self.probabilities[currIndex])
             currLen += overlap
             solution.append(self.oligo[choice])
             currIndex = choice
-
 
     def _generate_solutions(self):
         solutions = []
@@ -113,7 +105,8 @@ class ACO:
         for i in range(0, len(self.oligo)):
             for j in range(0, len(self.oligo)):
                 if sum(self.probabilities[i]) != 0:
-                    weights[i][j] = self.probabilities[i][j]/sum(self.probabilities[i])
+                    weights[i][j] = self.probabilities[i][j] / \
+                        sum(self.probabilities[i])
         for i in range(0, self.colony_size):
             solutions.append(self._generate_solution(weights))
         return solutions
@@ -145,7 +138,7 @@ class ACO:
             print('generacja: ', i)
             solutions = self._generate_solutions()
             topTen = self._compare_solutions(solutions)
-            #print(topTen[0][-1])
+            # print(topTen[0][-1])
 
             pheromones = self._pheromone_update(topTen)
 
@@ -157,7 +150,7 @@ class ACO:
                     else:
                         self.probabilities[j][k] = 0.1**self.alpha * \
                             self.spect_graph[j][k]**self.beta
-            #print(self.probabilities)
+            # print(self.probabilities)
             i += 1
         return topTen
 

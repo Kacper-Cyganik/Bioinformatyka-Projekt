@@ -1,6 +1,7 @@
 import utils
 from config import N_NEGATIVES, N_POSITIVES, N_DNA, N_DNA_CUT
 from ant_colony import ACO
+import Levenshtein
 
 def main():
 
@@ -33,7 +34,7 @@ def main():
             initNodeIndex = count
 
     # Run ACO
-    aco = ACO(alpha=10, beta=10, colony_size=60, generations=10, evaporation_rate=0.7, spect_graph=graph,
+    aco = ACO(alpha=3, beta=6, colony_size=50, generations=10, runtime = 0.5, evaporation_rate=0.45, spect_graph=graph,
               oligo=dna_out, init_node_index=initNodeIndex, init_node=initNode, max_len=N_DNA, spect_oligo=len(dna_cut))
 
     topTen = aco.run()
@@ -48,7 +49,7 @@ def main():
     result = utils.squash(topTen[0][0])
     print(result)
 
-    print(utils.check_effectiveness(dna, result))
+    print(Levenshtein.distance(dna, result))
 
 if __name__ == "__main__":
     main()

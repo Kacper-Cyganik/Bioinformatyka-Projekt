@@ -1,11 +1,13 @@
+from audioop import avg
+import time
+from unittest import result
 import numpy as np
 import utils
 from config import N_DNA_CUT
 
-
 class ACO:
 
-    def __init__(self, alpha=1, beta=7, colony_size=50, generations=10, evaporation_rate=0.65, spect_graph=None, oligo=None, init_node_index=0, init_node=None, max_len=500, spect_oligo=None):
+    def __init__(self, alpha=1, beta=7, colony_size=50, generations=10, runtime = 10, evaporation_rate=0.65, spect_graph=None, oligo=None, init_node_index=0, init_node=None, max_len=500, spect_oligo=None):
         """initialize class with data
 
         Args:
@@ -23,8 +25,9 @@ class ACO:
         """
 
         self.generations = generations
+        self.runtime = 60000 * runtime
         self.colony_size = colony_size
-        self.evaporation_rate = evaporation_rate
+        self.evaporation_rate = 1 - evaporation_rate
         self.alpha = alpha  # waga feromonów
         self.beta = beta  # waga pokrycia
         self.spect_graph = spect_graph
@@ -36,11 +39,11 @@ class ACO:
 
         self.pheromones = [[0 for column in range(
             len(self.oligo))] for row in range(len(self.oligo))]
-        self.probabilities = [[0 for column in range(
-            len(self.oligo))] for row in range(len(self.oligo))]
         for i in range(0, len(self.oligo)):
             for j in range(0, len(self.oligo)):
-                self.probabilities[i][j] = self.spect_graph[i][j]
+                self.pheromones[i][j] = self.spect_graph[i][j]
+
+        self.topTen = []
 
     def _goal_function(self, solution):
         """ACO Goal function
@@ -52,7 +55,7 @@ class ACO:
             int : result
         """
 
-        a = 0.6
+        a = 0.4
         b = 1 - a
 
         oligolen = len(solution[0])
@@ -75,28 +78,25 @@ class ACO:
         currIndex = self.init_node_index
 
         while True:
-            if sum(weights[currIndex]) == 0:  # no road to progress
+            if sum(weights[currIndex]) == 0: #no road to progress
                 if len(utils.squash(solution)) != self.max_len:
-                    # throw away this solution
-                    return [solution, abs(len(utils.squash(solution)) - self.max_len)]
+                    return [solution, abs(len(utils.squash(solution)) - self.max_len)] #throw away this solution
                 else:
-                    # I guess it was just the end
-                    return [solution, self._goal_function(solution)]
-            if len(utils.squash(solution)) == self.max_len:  # the length checks out
-                # It's a passible solution
-                return [solution, self._goal_function(solution)]
+                    return [solution, self._goal_function(solution)] #I guess it was just the end
+            if len(utils.squash(solution)) == self.max_len: #the length checks out
+                return [solution, self._goal_function(solution)] #It's a passible solution
+           
 
             choiceOligo = np.random.choice(self.oligo, p=weights[currIndex])
             choice = self.oligo.index(choiceOligo)
-            overlap = utils.check_overlap(
-                self.oligo[currIndex], self.oligo[choice])+1
-            self.probabilities[currIndex][choice] /= 2
+            overlap = utils.check_overlap(self.oligo[currIndex], self.oligo[choice])+1
+            self.pheromones[currIndex][choice] /= 2
             for i in range(0, len(self.oligo)):
-                weights[currIndex][i] = self.probabilities[currIndex][i] / \
-                    sum(self.probabilities[currIndex])
+                weights[currIndex][i] = self.pheromones[currIndex][i] / sum(self.pheromones[currIndex])
             currLen += overlap
             solution.append(self.oligo[choice])
             currIndex = choice
+
 
     def _generate_solutions(self):
         solutions = []
@@ -104,55 +104,57 @@ class ACO:
                    for y in range(len(self.oligo))]
         for i in range(0, len(self.oligo)):
             for j in range(0, len(self.oligo)):
-                if sum(self.probabilities[i]) != 0:
-                    weights[i][j] = self.probabilities[i][j] / \
-                        sum(self.probabilities[i])
+                if sum(self.pheromones[i]) != 0:
+                    weights[i][j] = self.pheromones[i][j]/sum(self.pheromones[i])
         for i in range(0, self.colony_size):
             solutions.append(self._generate_solution(weights))
         return solutions
 
     def _compare_solutions(self, solutions):
-        topTen = []
         solutions.sort(key=lambda row: (row[1]))
+        self.topTen = self.topTen[:3]
         for i in range(0, 10):
-            topTen.append(solutions[i])
-        return topTen
+            self.topTen.append(solutions[i])
+        self.topTen.sort(key=lambda row: (row[1]))
+        self.topTen = self.topTen[:10]
 
     def _pheromone_update(self, topTen):
-        currIndex = 0
-        nextIndex = 0
-        for i in range(0, len(topTen)):
-            for j in range(0, len(topTen[i][0])-1):
-                currIndex = self.oligo.index(topTen[i][0][j])
-                nextIndex = self.oligo.index(topTen[i][0][j+1])
-                self.pheromones[currIndex][nextIndex] += topTen[i][1]
+        mean = np.mean(self.pheromones)
+        tolerance = 0.2*mean
         for i in range(0, len(self.oligo)):
             for j in range(0, len(self.oligo)):
                 self.pheromones[i][j] *= self.evaporation_rate
-        return self.pheromones
+                if self.pheromones[i][j] > 100:
+                    self.pheromones[i][j] = 100
+                if self.pheromones[i][j] > mean + tolerance:
+                    self.pheromones[i][j] -= tolerance
+                if self.pheromones[i][j] < mean - tolerance and self.pheromones[i][j] > tolerance:
+                    self.pheromones[i][j] += tolerance
+                
+        currIndex = 0
+        nextIndex = 0
+        for result in topTen:
+            result = result[0]
+            for i in range(len(result)-1):
+                currIndex = self.oligo.index(result[i])
+                nextIndex = self.oligo.index(result[i+1])
+                self.pheromones[currIndex][nextIndex] += self.max_len/utils.check_overlap(result[i], result[i+1])
+
+        #print(self.pheromones)
 
     def run(self):
-
         i = 0
         while (i < self.generations):
             print('generacja: ', i)
             solutions = self._generate_solutions()
-            topTen = self._compare_solutions(solutions)
-            # print(topTen[0][-1])
+            self._compare_solutions(solutions)
+            print("goal: ", self.topTen[0][-1])
 
-            pheromones = self._pheromone_update(topTen)
+            self._pheromone_update(self.topTen)
 
-            for j in range(0, len(self.oligo)):
-                for k in range(0, len(self.oligo)):
-                    if (pheromones[j][k] != 0):
-                        self.probabilities[j][k] = pheromones[j][k]**self.alpha * \
-                            self.spect_graph[j][k]**self.beta
-                    else:
-                        self.probabilities[j][k] = 0.1**self.alpha * \
-                            self.spect_graph[j][k]**self.beta
-            # print(self.probabilities)
             i += 1
-        return topTen
+        print(self.pheromones)
+        return self.topTen
 
 
 if __name__ == "__main__":

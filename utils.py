@@ -218,6 +218,13 @@ def check_effectiveness(str1, str2):
     # print('coverage: ', coverage)
     return Levenshtein.distance(str1,str2)
 
+def check_repetitions(original_repetitions: dict(), generated_repetitons: dict()):
+    identical_repetitions = 0
+    for nucleotide in generated_repetitons:
+        if original_repetitions[nucleotide]==generated_repetitons[nucleotide]:
+            identical_repetitions+=1
+    return identical_repetitions / len(generated_repetitons)
+
 if __name__ == '__main__':
     print(check_overlap('ABCDEFGH','BCDEFGHI'))
     l1=['AACTG', 'CTGAA', 'ATCC']

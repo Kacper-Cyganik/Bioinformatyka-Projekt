@@ -34,8 +34,8 @@ def main():
             initNodeIndex = count
 
     # Run ACO
-    aco = ACO(alpha=3, beta=6, colony_size=50, generations=10, runtime = 0.5, evaporation_rate=0.45, spect_graph=graph,
-              oligo=dna_out, init_node_index=initNodeIndex, init_node=initNode, max_len=N_DNA, spect_oligo=len(dna_cut))
+    aco = ACO(alpha=5, beta=5, colony_size=50, generations=10, runtime = 0.5, evaporation_rate=0.5, spect_graph=graph,
+              oligo=dna_out, init_node_index=initNodeIndex, init_node=initNode, max_len=N_DNA, spect_oligo=len(dna_cut), repetitions=repetitions)
 
     topTen = aco.run()
     print('Ostateczne wyniki: ')

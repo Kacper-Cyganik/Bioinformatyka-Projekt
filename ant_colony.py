@@ -55,14 +55,12 @@ class ACO:
         """
 
         a = 0.4
-        b = 1 - a
+        b = 0.3
+        c = 0.3
 
-        # reward for idenctical repetitions
         _, solution_repetitions = utils.generate_repetitions(solution)
         repetitions_check = utils.check_repetitions(
             self.repetitions, solution_repetitions)
-        repetitions_penalty = 0.05 if repetitions_check >= 0.80 else -0.05
-        #
 
         oligolen = len(solution[0])
         maxcov = self.max_len/oligolen * (oligolen-1)
@@ -76,7 +74,7 @@ class ACO:
             overlap = N_DNA_CUT-utils.check_overlap(oligo1, oligo2)+1
             A += oligolen - overlap
         
-        result = a-((maxcov - A)/maxcov)*a + ((maxnodes - B)/maxnodes)*b-repetitions_penalty
+        result = a-((maxcov - A)/maxcov)*a + ((maxnodes - B)/maxnodes)*b + c - c*repetitions_check
 
         if DEBUG:
             _, solution_repetitions = utils.generate_repetitions(solution)
@@ -151,6 +149,10 @@ class ACO:
                     self.pheromones[i][j] -= tolerance
                 if self.pheromones[i][j] < mean - tolerance and self.pheromones[i][j] > tolerance:
                     self.pheromones[i][j] += tolerance
+                if (self.pheromones[i][j] != 0):
+                    self.pheromones[i][j] = self.pheromones[i][j]**self.alpha * self.spect_graph[i][j]**self.beta
+                else:
+                    self.pheromones[i][j] = 0.1**self.alpha * self.spect_graph[i][j]**self.beta
 
         currIndex = 0
         nextIndex = 0
@@ -175,7 +177,7 @@ class ACO:
             self._pheromone_update(self.topTen)
 
             i += 1
-        print(self.pheromones)
+        #print(self.pheromones)
         return self.topTen
 
 

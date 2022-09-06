@@ -2,6 +2,15 @@ from random import choice
 import numpy as np
 import config
 import Levenshtein
+import time
+
+def timing_val(func):
+    def wrapper(*arg, **kw):
+        t1 = time.time()
+        func(*arg, **kw)
+        t2 = time.time()
+        print('Time',t2 - t1)
+    return wrapper
 
 def squash(arr: list) -> str:
     """Generates string from list of nucleotides excluding overlaping sequences

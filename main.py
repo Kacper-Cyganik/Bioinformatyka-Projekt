@@ -3,12 +3,13 @@ from config import N_NEGATIVES, N_POSITIVES, N_DNA, N_DNA_CUT
 from ant_colony import ACO
 import Levenshtein
 
+@utils.timing_val
 def main():
 
 
     # Generate DNA of length n
     dna = utils.generate_dna(n=N_DNA)
-    #utils.write_dna_to_file(dna, 'data/dna500.txt')
+    utils.write_dna_to_file(dna, f'data/dna{N_DNA}.txt')
     #dna = utils.read_dna_from_file('data/dna200.txt')
     # Cut DNA into k-length nucleotides
     dna_cut = utils.cut_dna(dna, N_DNA_CUT)

@@ -54,8 +54,8 @@ class ACO:
             int : result
         """
 
-        a = 1.0
-        b = 0.0
+        a = 6.0
+        b = 2.0
         c = 1 - a - b
         _, solution_repetitions = utils.generate_repetitions(solution)
         repetitions_check = utils.check_repetitions(

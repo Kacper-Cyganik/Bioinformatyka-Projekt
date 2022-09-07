@@ -5,7 +5,7 @@ from config import N_DNA_CUT, DEBUG
 
 class ACO:
 
-    def __init__(self, alpha=1, beta=7, colony_size=50, generations=10, runtime=10, evaporation_rate=0.65, spect_graph=None, oligo=None, init_node_index=0, init_node=None, max_len=500, spect_oligo=None, repetitions=None):
+    def __init__(self, alpha=1, beta=7, colony_size=50, generations=10, evaporation_rate=0.65, spect_graph=None, oligo=None, init_node_index=0, init_node=None, max_len=500, spect_oligo=None, repetitions=None):
         """initialize class with data
 
         Args:
@@ -23,7 +23,6 @@ class ACO:
         """
 
         self.generations = generations
-        self.runtime = 60000 * runtime
         self.colony_size = colony_size
         self.evaporation_rate = 1 - evaporation_rate
         self.alpha = alpha  # waga feromonów
@@ -35,6 +34,7 @@ class ACO:
         self.max_len = max_len
         self.spect_oligo = spect_oligo
         self.repetitions = repetitions
+        self.goal = 0
 
         self.pheromones = [[0 for column in range(
             len(self.oligo))] for row in range(len(self.oligo))]
@@ -54,10 +54,9 @@ class ACO:
             int : result
         """
 
-        a = 0.4
-        b = 0.3
-        c = 0.3
-
+        a = 1.0
+        b = 0.0
+        c = 1 - a - b
         _, solution_repetitions = utils.generate_repetitions(solution)
         repetitions_check = utils.check_repetitions(
             self.repetitions, solution_repetitions)
@@ -91,42 +90,46 @@ class ACO:
         oligolen = len(self.init_node)
         currLen = oligolen
         currIndex = self.init_node_index
+        self.goal = 0
 
         while True:
+            choiceWeights = weights.copy()[currIndex]
+            for i in range(len(choiceWeights)):
+                # Zero weights if it makes the goal go down
+                possibleNext = solution.copy()
+                possibleNext.append(self.oligo[i])
+                if (self._goal_function(possibleNext) < self.goal):
+                    choiceWeights[i] = 0
+            sumWeights = sum(choiceWeights)
+            if sumWeights != 0:
+                choiceWeights /= sumWeights
             if sum(weights[currIndex]) == 0:  # no road to progress
                 if len(utils.squash(solution)) != self.max_len:
                     # throw away this solution
                     return [solution, abs(len(utils.squash(solution)) - self.max_len)]
                 else:
                     # I guess it was just the end
-                    return [solution, self._goal_function(solution)]
+                    return [solution, self.goal]
             if len(utils.squash(solution)) == self.max_len:  # the length checks out
                 # It's a passible solution
-                return [solution, self._goal_function(solution)]
-
-            choiceOligo = np.random.choice(self.oligo, p=weights[currIndex])
+                return [solution, self.goal]
+            choiceOligo = np.random.choice(self.oligo, p=choiceWeights)
             choice = self.oligo.index(choiceOligo)
             overlap = utils.check_overlap(
                 self.oligo[currIndex], self.oligo[choice])+1
             self.pheromones[currIndex][choice] /= 2
             for i in range(0, len(self.oligo)):
-                weights[currIndex][i] = self.pheromones[currIndex][i] / \
-                    sum(self.pheromones[currIndex])
+                weights[currIndex][i] = self.pheromones[currIndex][i] / sum(self.pheromones[currIndex])
             currLen += overlap
             solution.append(self.oligo[choice])
+            self.goal = self._goal_function(solution)
             currIndex = choice
+            
 
     def _generate_solutions(self):
         solutions = []
-        weights = [[0 for x in range(len(self.oligo))]
-                   for y in range(len(self.oligo))]
-        for i in range(0, len(self.oligo)):
-            for j in range(0, len(self.oligo)):
-                if sum(self.pheromones[i]) != 0:
-                    weights[i][j] = self.pheromones[i][j] / \
-                        sum(self.pheromones[i])
-        for i in range(0, self.colony_size):
-            solutions.append(self._generate_solution(weights))
+        for _ in range(0, self.colony_size):
+            solutions.append(self._generate_solution(self.pheromones))
         return solutions
 
     def _compare_solutions(self, solutions):

@@ -5,7 +5,7 @@ from config import N_DNA_CUT, DEBUG
 
 class ACO:
 
-    def __init__(self, alpha=1, beta=7, colony_size=50, generations=10, evaporation_rate=0.65, spect_graph=None, oligo=None, init_node_index=0, init_node=None, max_len=500, spect_oligo=None, repetitions=None):
+    def __init__(self, alpha=1, beta=7, colony_size=50, generations=10, runtime=10, evaporation_rate=0.65, spect_graph=None, oligo=None, init_node_index=0, init_node=None, max_len=500, spect_oligo=None, repetitions=None):
         """initialize class with data
 
         Args:
@@ -23,6 +23,7 @@ class ACO:
         """
 
         self.generations = generations
+        self.runtime = 60000 * runtime
         self.colony_size = colony_size
         self.evaporation_rate = 1 - evaporation_rate
         self.alpha = alpha  # waga feromonów
@@ -34,7 +35,6 @@ class ACO:
         self.max_len = max_len
         self.spect_oligo = spect_oligo
         self.repetitions = repetitions
-        self.goal = 0
 
         self.pheromones = [[0 for column in range(
             len(self.oligo))] for row in range(len(self.oligo))]
@@ -54,12 +54,15 @@ class ACO:
             int : result
         """
 
-        a = 6.0
-        b = 2.0
-        c = 1 - a - b
+        a = 0.4
+        b = 1 - a
+
+        # reward for idenctical repetitions
         _, solution_repetitions = utils.generate_repetitions(solution)
         repetitions_check = utils.check_repetitions(
             self.repetitions, solution_repetitions)
+        repetitions_penalty = 0.05 if repetitions_check >= 0.80 else -0.05
+        #
 
         oligolen = len(solution[0])
         maxcov = self.max_len/oligolen * (oligolen-1)
@@ -73,7 +76,7 @@ class ACO:
             overlap = N_DNA_CUT-utils.check_overlap(oligo1, oligo2)+1
             A += oligolen - overlap
         
-        result = a-((maxcov - A)/maxcov)*a + ((maxnodes - B)/maxnodes)*b + c - c*repetitions_check
+        result = a-((maxcov - A)/maxcov)*a + ((maxnodes - B)/maxnodes)*b-repetitions_penalty
 
         if DEBUG:
             _, solution_repetitions = utils.generate_repetitions(solution)
@@ -90,46 +93,42 @@ class ACO:
         oligolen = len(self.init_node)
         currLen = oligolen
         currIndex = self.init_node_index
-        self.goal = 0
 
         while True:
-            choiceWeights = weights.copy()[currIndex]
-            for i in range(len(choiceWeights)):
-                # Zero weights if it makes the goal go down
-                possibleNext = solution.copy()
-                possibleNext.append(self.oligo[i])
-                if (self._goal_function(possibleNext) < self.goal):
-                    choiceWeights[i] = 0
-            sumWeights = sum(choiceWeights)
-            if sumWeights != 0:
-                choiceWeights /= sumWeights
             if sum(weights[currIndex]) == 0:  # no road to progress
                 if len(utils.squash(solution)) != self.max_len:
                     # throw away this solution
                     return [solution, abs(len(utils.squash(solution)) - self.max_len)]
                 else:
                     # I guess it was just the end
-                    return [solution, self.goal]
+                    return [solution, self._goal_function(solution)]
             if len(utils.squash(solution)) == self.max_len:  # the length checks out
                 # It's a passible solution
-                return [solution, self.goal]
-            choiceOligo = np.random.choice(self.oligo, p=choiceWeights)
+                return [solution, self._goal_function(solution)]
+
+            choiceOligo = np.random.choice(self.oligo, p=weights[currIndex])
             choice = self.oligo.index(choiceOligo)
             overlap = utils.check_overlap(
                 self.oligo[currIndex], self.oligo[choice])+1
             self.pheromones[currIndex][choice] /= 2
             for i in range(0, len(self.oligo)):
-                weights[currIndex][i] = self.pheromones[currIndex][i] / sum(self.pheromones[currIndex])
+                weights[currIndex][i] = self.pheromones[currIndex][i] / \
+                    sum(self.pheromones[currIndex])
             currLen += overlap
             solution.append(self.oligo[choice])
-            self.goal = self._goal_function(solution)
             currIndex = choice
-            
 
     def _generate_solutions(self):
         solutions = []
-        for _ in range(0, self.colony_size):
-            solutions.append(self._generate_solution(self.pheromones))
+        weights = [[0 for x in range(len(self.oligo))]
+                   for y in range(len(self.oligo))]
+        for i in range(0, len(self.oligo)):
+            for j in range(0, len(self.oligo)):
+                if sum(self.pheromones[i]) != 0:
+                    weights[i][j] = self.pheromones[i][j] / \
+                        sum(self.pheromones[i])
+        for i in range(0, self.colony_size):
+            solutions.append(self._generate_solution(weights))
         return solutions
 
     def _compare_solutions(self, solutions):
@@ -152,10 +151,6 @@ class ACO:
                     self.pheromones[i][j] -= tolerance
                 if self.pheromones[i][j] < mean - tolerance and self.pheromones[i][j] > tolerance:
                     self.pheromones[i][j] += tolerance
-                if (self.pheromones[i][j] != 0):
-                    self.pheromones[i][j] = self.pheromones[i][j]**self.alpha * self.spect_graph[i][j]**self.beta
-                else:
-                    self.pheromones[i][j] = 0.1**self.alpha * self.spect_graph[i][j]**self.beta
 
         currIndex = 0
         nextIndex = 0
@@ -180,7 +175,7 @@ class ACO:
             self._pheromone_update(self.topTen)
 
             i += 1
-        #print(self.pheromones)
+        print(self.pheromones)
         return self.topTen
 
 

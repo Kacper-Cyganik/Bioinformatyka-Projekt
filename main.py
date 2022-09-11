@@ -3,13 +3,12 @@ from config import N_NEGATIVES, N_POSITIVES, N_DNA, N_DNA_CUT
 from ant_colony import ACO
 import Levenshtein
 
-@utils.timing_val
 def main():
 
 
     # Generate DNA of length n
     dna = utils.generate_dna(n=N_DNA)
-    utils.write_dna_to_file(dna, f'data/dna{N_DNA}.txt')
+    #utils.write_dna_to_file(dna, 'data/dna500.txt')
     #dna = utils.read_dna_from_file('data/dna200.txt')
     # Cut DNA into k-length nucleotides
     dna_cut = utils.cut_dna(dna, N_DNA_CUT)
@@ -35,7 +34,7 @@ def main():
             initNodeIndex = count
 
     # Run ACO
-    aco = ACO(alpha=5, beta=5, colony_size=50, generations=10, evaporation_rate=0.4, spect_graph=graph,
+    aco = ACO(alpha=5, beta=5, colony_size=50, generations=10, runtime = 0.5, evaporation_rate=0.5, spect_graph=graph,
               oligo=dna_out, init_node_index=initNodeIndex, init_node=initNode, max_len=N_DNA, spect_oligo=len(dna_cut), repetitions=repetitions)
 
     topTen = aco.run()
@@ -44,7 +43,7 @@ def main():
     print("------")
 
     # Print DNA
-    print('Original DNA')  
+    print('Original DNA')
     print(dna)
     print('Found DNA')
     result = utils.squash(topTen[0][0])
